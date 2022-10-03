@@ -12,6 +12,7 @@ import net.coderbot.iris.pipeline.FixedFunctionWorldRenderingPipeline;
 import net.coderbot.iris.pipeline.PipelineManager;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
+import net.coderbot.iris.renderdoc.RenderDoc;
 import net.coderbot.iris.shaderpack.DimensionId;
 import net.coderbot.iris.shaderpack.OptionalBoolean;
 import net.coderbot.iris.shaderpack.ProgramSet;
@@ -136,7 +137,7 @@ public class Iris {
 			logger.error("Failed to initialize Iris configuration, default values will be used instead");
 			logger.error("", e);
 		}
-
+		RenderDoc.load();
 		this.updateChecker.checkForUpdates(irisConfig);
 
 		reloadKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping("iris.keybind.reload", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "iris.keybinds"));
