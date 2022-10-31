@@ -323,51 +323,52 @@ public class AdvancedShadowCullingFrustum extends Frustum {
 	 * @param maxZ Maximum Z value of the AABB.
 	 * @return 0 if nothing is visible, 1 if everything is visible, 2 if only some corners are visible.
 	 */
-	private int checkCornerVisibility(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+	private int checkCornerVisibility(float x1, float y1, float z1, float x2, float y2, float z2) {
 		boolean inside = true;
-		float outsideBoundX;
-		float outsideBoundY;
-		float outsideBoundZ;
-		float insideBoundX;
-		float insideBoundY;
-		float insideBoundZ;
+		boolean intersect = false;
 
 		for (int i = 0; i < planeCount; ++i) {
 			Vector4f plane = this.planes[i];
 
-			// Check if plane is inside or intersecting.
-			// This is ported from JOML's FrustumIntersection.
+			if ((!(dot(plane, x1, y1, z1) > 0.0F))
+				|| (!(dot(plane, x2, y1, z1) > 0.0F))
+				|| (!(dot(plane, x1, y2, z1) > 0.0F))
+				|| (!(dot(plane, x2, y2, z1) > 0.0F))
+				|| (!(dot(plane, x1, y1, z2) > 0.0F))
+				|| (!(dot(plane, x2, y1, z2) > 0.0F))
+				|| (!(dot(plane, x1, y2, z2) > 0.0F))
+				|| (!(dot(plane, x2, y2, z2) > 0.0F))) {
+					inside = false;
+				}
 
-			if (plane.x() < 0) {
-				outsideBoundX = minX;
-				insideBoundX = maxX;
-			} else {
-				outsideBoundX = maxX;
-				insideBoundX = minX;
+			if (       (dot(plane, x1, y1, z1) > 0.0F)
+				|| (dot(plane, x2, y1, z1) > 0.0F)
+				|| (dot(plane, x1, y2, z1) > 0.0F)
+				|| (dot(plane, x2, y2, z1) > 0.0F)
+				|| (dot(plane, x1, y1, z2) > 0.0F)
+				|| (dot(plane, x2, y1, z2) > 0.0F)
+				|| (dot(plane, x1, y2, z2) > 0.0F)
+				|| (dot(plane, x2, y2, z2) > 0.0F)) {
+				intersect = true;
 			}
-
-			if (plane.y() < 0) {
-				outsideBoundY = minY;
-				insideBoundY = maxY;
-			} else {
-				outsideBoundY = maxY;
-				insideBoundY = minY;
-			}
-
-			if (plane.z() < 0) {
-				outsideBoundZ = minZ;
-				insideBoundZ = maxZ;
-			} else {
-				outsideBoundZ = maxZ;
-				insideBoundZ = minZ;
-			}
-
-			if (Math.fma(plane.x(), outsideBoundX, Math.fma(plane.y(), outsideBoundY, plane.z() * outsideBoundZ)) < -plane.w()) {
-				return 0;
-			}
-			inside &= Math.fma(plane.x(), insideBoundX, Math.fma(plane.y(), insideBoundY, plane.z() * insideBoundZ)) >= -plane.w();
 		}
 
-		return inside ? 1 : 2;
+		return intersect ? (inside ? 1 : 2) : 0;
 	}
+
+	private boolean cornerCheck(Vector4f plane, float x1, float y1, float z1, float x2, float y2, float z2) {
+		return (dot(plane, x1, y1, z1) > 0.0F)
+			&& (dot(plane, x2, y1, z1) > 0.0F)
+			&& (dot(plane, x1, y2, z1) > 0.0F)
+			&& (dot(plane, x2, y2, z1) > 0.0F)
+			&& (dot(plane, x1, y1, z2) > 0.0F)
+			&& (dot(plane, x2, y1, z2) > 0.0F)
+			&& (dot(plane, x1, y2, z2) > 0.0F)
+			&& (dot(plane, x2, y2, z2) > 0.0F);
+	}
+
+	private float dot(Vector4f input, float x, float y, float z) {
+		// This won't get intrinsics since we compile against J8, but hopefully newer Java can autovectorize this...?
+		return Math.fma(input.x(), x, Math.fma(input.y(), y, Math.fma(input.z(), z, input.w())));
+	};
 }
