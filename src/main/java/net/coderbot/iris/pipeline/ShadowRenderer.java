@@ -89,6 +89,7 @@ public class ShadowRenderer {
 	private int renderedShadowEntities = 0;
 	private int renderedShadowBlockEntities = 0;
 	private ProfilerFiller profiler;
+	private boolean cullSideFaces;
 
 	public ShadowRenderer(ProgramSource shadow, PackDirectives directives,
 						  ShadowRenderTargets shadowRenderTargets) {
@@ -135,6 +136,8 @@ public class ShadowRenderer {
 		} else {
 			this.renderBuffersExt = null;
 		}
+
+		this.cullSideFaces = Math.abs(sunPathRotation) < 0.01;
 
 		configureSamplingSettings(shadowDirectives);
 	}
@@ -461,7 +464,7 @@ public class ShadowRenderer {
 
 		profiler.popPush("shadows");
 		ACTIVE = true;
-		CULL_SIDE_FACES = sunPathRotation < 0.01;
+		CULL_SIDE_FACES = cullSideFaces;
 
 		// NB: We store the previous player buffers in order to be able to allow mods rendering entities in the shadow pass (Flywheel) to use the shadow buffers instead.
 		RenderBuffers playerBuffers = levelRenderer.getRenderBuffers();
