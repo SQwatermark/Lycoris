@@ -61,6 +61,7 @@ import java.util.Objects;
 public class ShadowRenderer {
 	public static Matrix4f MODELVIEW;
 	public static Matrix4f PROJECTION;
+	public static boolean CULL_SIDE_FACES;
 	public static List<BlockEntity> visibleBlockEntities;
 	public static boolean ACTIVE = false;
 	private final float halfPlaneLength;
@@ -460,6 +461,7 @@ public class ShadowRenderer {
 
 		profiler.popPush("shadows");
 		ACTIVE = true;
+		CULL_SIDE_FACES = sunPathRotation < 0.01;
 
 		// NB: We store the previous player buffers in order to be able to allow mods rendering entities in the shadow pass (Flywheel) to use the shadow buffers instead.
 		RenderBuffers playerBuffers = levelRenderer.getRenderBuffers();
@@ -625,6 +627,7 @@ public class ShadowRenderer {
 		levelRenderer.setRenderBuffers(playerBuffers);
 
 		ACTIVE = false;
+		CULL_SIDE_FACES = false;
 		profiler.pop();
 		profiler.popPush("updatechunks");
 	}
@@ -635,6 +638,9 @@ public class ShadowRenderer {
 		messages.add("[" + Iris.MODNAME + "] Shadow Culling Terrain: " + terrainFrustumHolder.getCullingInfo() + " Entity: " + entityFrustumHolder.getCullingInfo());
 		messages.add("[" + Iris.MODNAME + "] Shadow Terrain: " + debugStringTerrain
 			+ (shouldRenderTerrain ? "" : " (no terrain) ") + (shouldRenderTranslucent ? "" : "(no translucent)"));
+		if (sunPathRotation < 0.01) {
+			messages.add("[" + Iris.MODNAME + "] Optimized block culling enabled (sun rotation = 0)");
+		}
 		messages.add("[" + Iris.MODNAME + "] Shadow Entities: " + getEntitiesDebugString());
 		messages.add("[" + Iris.MODNAME + "] Shadow Block Entities: " + getBlockEntitiesDebugString());
 

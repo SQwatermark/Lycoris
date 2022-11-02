@@ -11,4 +11,8 @@ public class ShadowRenderingState {
 	public static Matrix4f getShadowOrthoMatrix() {
 		return ShadowRenderer.ACTIVE ? ShadowRenderer.PROJECTION.copy() : null;
 	}
+
+    public static boolean supportsOptimizedBlockFaceCulling() {
+		return ShadowRenderer.ACTIVE && ShadowRenderer.CULL_SIDE_FACES;
+    }
 }

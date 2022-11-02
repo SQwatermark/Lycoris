@@ -3,6 +3,7 @@ package net.coderbot.iris.compat.sodium.mixin.shadow_map;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
@@ -79,6 +80,17 @@ public class MixinChunkRenderManager implements SwappableChunkRenderManager {
 	@Unique
 	private static final ObjectArrayFIFOQueue<?> EMPTY_QUEUE = new ObjectArrayFIFOQueue<>();
 
+	@Unique
+	private static int FACES;
+
+	static {
+		FACES = 0;
+
+		FACES |= ChunkFaceFlags.of(ModelQuadFacing.UP);
+		FACES |= ChunkFaceFlags.of(ModelQuadFacing.EAST);
+		FACES |= ChunkFaceFlags.of(ModelQuadFacing.WEST);
+	}
+
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void iris$onInit(SodiumWorldRenderer renderer, ChunkRenderBackend<?> backend,
 							 BlockRenderPassManager renderPassManager, ClientLevel level, int renderDistance,
@@ -134,7 +146,7 @@ public class MixinChunkRenderManager implements SwappableChunkRenderManager {
 														  CallbackInfoReturnable<Integer> cir) {
 		// TODO: Enable chunk face culling during the shadow pass
 		if (ShadowRenderingState.areShadowsCurrentlyBeingRendered()) {
-			cir.setReturnValue(ChunkFaceFlags.ALL);
+			cir.setReturnValue(ShadowRenderingState.supportsOptimizedBlockFaceCulling() ? FACES : ChunkFaceFlags.ALL);
 		}
 	}
 
