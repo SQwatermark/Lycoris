@@ -19,9 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinFogRenderer {
 	@Shadow private static float fogRed, fogGreen, fogBlue;
 
-	@Inject(method = "setupFog", at = @At("HEAD"))
-	private static void iris$setupLegacyWaterFog(Camera camera, FogRenderer.FogMode fogMode, float f, boolean bl,
-												 CallbackInfo ci) {
+	@Inject(method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V", at = @At("HEAD"), remap = false)
+	private static void iris$setupLegacyWaterFog(Camera camera, FogRenderer.FogMode p_109026_, float p_109027_, boolean p_109028_, float partialTicks, CallbackInfo ci) {
 		if (camera.getFluidInCamera() == FogType.WATER) {
 			Entity entity = camera.getEntity();
 

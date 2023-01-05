@@ -3,7 +3,6 @@ package net.coderbot.iris;
 import com.google.common.base.Throwables;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.coderbot.iris.compat.sodium.SodiumVersionCheck;
 import net.coderbot.iris.config.IrisConfig;
 import net.coderbot.iris.gl.GLDebug;
 import net.coderbot.iris.gl.shader.StandardMacros;
@@ -22,29 +21,28 @@ import net.coderbot.iris.shaderpack.option.Profile;
 import net.coderbot.iris.shaderpack.option.values.MutableOptionValues;
 import net.coderbot.iris.shaderpack.option.values.OptionValues;
 import net.coderbot.iris.texture.pbr.PBRTextureManager;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.Version;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -53,6 +51,8 @@ import java.util.stream.Stream;
 import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 
+@Mod(Iris.MODID)
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Iris.MODID, value = Dist.CLIENT)
 public class Iris {
 	public static final String MODID = "iris";
 
@@ -71,7 +71,7 @@ public class Iris {
 	private static ShaderPack currentPack;
 	private static String currentPackName;
 	private static boolean sodiumInvalid;
-	private static boolean hasNEC;
+//	private static boolean hasNEC;
 	private static boolean sodiumInstalled;
 	private static boolean initialized;
 
@@ -88,9 +88,16 @@ public class Iris {
 	// behavior is more concrete and therefore is more likely to repair a user's issues
 	private static boolean resetShaderPackOptions = false;
 
-	private static Version IRIS_VERSION;
+	private static ArtifactVersion IRIS_VERSION;
 	private static UpdateChecker updateChecker;
 	private static boolean fallback;
+
+	@SubscribeEvent
+	public static void registerKeyBinding(FMLClientSetupEvent event) {
+		ClientRegistry.registerKeyBinding(reloadKeybind);
+		ClientRegistry.registerKeyBinding(toggleShadersKeybind);
+		ClientRegistry.registerKeyBinding(shaderpackScreenKeybind);
+	}
 
     /**
 	 * Called very early on in Minecraft initialization. At this point we *cannot* safely access OpenGL, but we can do
@@ -102,27 +109,30 @@ public class Iris {
 	 * <p>This is called right before options are loaded, so we can add key bindings here.</p>
 	 */
 	public void onEarlyInitialize() {
-		FabricLoader.getInstance().getModContainer("sodium").ifPresent(
-				modContainer -> {
-					sodiumInstalled = true;
-					String versionString = modContainer.getMetadata().getVersion().getFriendlyString();
+		sodiumInstalled = true;
+//		ModList.get().getModContainerById("sodium").ifPresent(
+//				modContainer -> {
+//					var version = modContainer.getModInfo().getVersion();
+//					sodiumInstalled = true;
+////					String versionString = modContainer.getMetadata().getVersion().getFriendlyString();
+//
+//					// This makes it so that if we don't have the right version of Sodium, it will show the user a
+//					// nice warning, and prevent them from playing the game with a wrong version of Sodium.
+//					// TODO
+////					if (!SodiumVersionCheck.isAllowedVersion(versionString)) {
+////						sodiumInvalid = true;
+////					}
+//				}
+//		);
+//
+////		hasNEC = FabricLoader.getInstance().isModLoaded("notenoughcrashes");
+//
+//		ModContainer iris = ModList.get().getModContainerById(MODID)
+//				.orElseThrow(() -> new IllegalStateException("Couldn't find the mod container for Iris"));
 
-					// This makes it so that if we don't have the right version of Sodium, it will show the user a
-					// nice warning, and prevent them from playing the game with a wrong version of Sodium.
-					if (!SodiumVersionCheck.isAllowedVersion(versionString)) {
-						sodiumInvalid = true;
-					}
-				}
-		);
+		IRIS_VERSION = new DefaultArtifactVersion("0.0.1");
 
-		hasNEC = FabricLoader.getInstance().isModLoaded("notenoughcrashes");
-
-		ModContainer iris = FabricLoader.getInstance().getModContainer(MODID)
-				.orElseThrow(() -> new IllegalStateException("Couldn't find the mod container for Iris"));
-
-		IRIS_VERSION = iris.getMetadata().getVersion();
-
-		this.updateChecker = new UpdateChecker(IRIS_VERSION);
+		updateChecker = new UpdateChecker(IRIS_VERSION);
 
 		try {
 			if (!Files.exists(getShaderpacksDirectory())) {
@@ -133,7 +143,7 @@ public class Iris {
 			logger.warn("", e);
 		}
 
-		irisConfig = new IrisConfig(FabricLoader.getInstance().getConfigDir().resolve("iris.properties"));
+		irisConfig = new IrisConfig(Paths.get("config").resolve("iris.properties"));
 
 		try {
 			irisConfig.initialize();
@@ -142,11 +152,12 @@ public class Iris {
 			logger.error("", e);
 		}
 
-		this.updateChecker.checkForUpdates(irisConfig);
+		updateChecker.checkForUpdates(irisConfig);
 
-		reloadKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping("iris.keybind.reload", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "iris.keybinds"));
-		toggleShadersKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping("iris.keybind.toggleShaders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "iris.keybinds"));
-		shaderpackScreenKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping("iris.keybind.shaderPackSelection", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "iris.keybinds"));
+		reloadKeybind = new KeyMapping("iris.keybind.reload", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "iris.keybinds");
+		toggleShadersKeybind = new KeyMapping("iris.keybind.toggleShaders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "iris.keybinds");
+		shaderpackScreenKeybind = new KeyMapping("iris.keybind.shaderPackSelection", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "iris.keybinds");
+
 
 		setupCommands(Minecraft.getInstance());
 
@@ -695,7 +706,7 @@ public class Iris {
 			return "Version info unknown!";
 		}
 
-		return IRIS_VERSION.getFriendlyString();
+		return IRIS_VERSION.getQualifier(); // TODO ?
 	}
 
 	public static String getFormattedVersion() {
@@ -724,13 +735,13 @@ public class Iris {
 		return sodiumInstalled;
 	}
 
-	public static boolean hasNotEnoughCrashes() {
-		return hasNEC;
-	}
+//	public static boolean hasNotEnoughCrashes() {
+//		return hasNEC;
+//	}
 
 	public static Path getShaderpacksDirectory() {
 		if (shaderpacksDirectory == null) {
-			shaderpacksDirectory = FabricLoader.getInstance().getGameDir().resolve("shaderpacks");
+			shaderpacksDirectory = Paths.get("shaderpacks");
 		}
 
 		return shaderpacksDirectory;

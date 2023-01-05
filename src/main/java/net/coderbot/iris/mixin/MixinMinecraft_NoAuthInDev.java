@@ -2,9 +2,9 @@ package net.coderbot.iris.mixin;
 
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +26,7 @@ public class MixinMinecraft_NoAuthInDev {
 
 	@Inject(method = "createUserApiService", at = @At("HEAD"), cancellable = true)
 	private void iris$noSocialInteractionsInDevelopment(YggdrasilAuthenticationService yggdrasilAuthenticationService, GameConfig arg, CallbackInfoReturnable<UserApiService> cir) {
-		if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+		if (!FMLEnvironment.production) {
 			LOGGER.info("[Iris] Suppressing Yggdrasil authentication check because this is a development environment");
 			cir.setReturnValue(UserApiService.OFFLINE);
 		}

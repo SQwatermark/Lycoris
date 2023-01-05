@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "net.coderbot.iris.mixin",
   "compatibilityLevel": "JAVA_8",
+  "refmap": "iris.refmap.json",
   "client": [
     "DimensionTypeAccessor",
     "GameRendererAccessor",
@@ -45,7 +46,7 @@
     "MixinTheEndPortalRenderer",
     "MixinTitleScreen",
     "MixinTweakFarPlane",
-    "MixinWindow",
+//    "MixinWindow",
     "MixinSystemReport",
     "MixinUniform",
     "MixinVertexBuffer",
