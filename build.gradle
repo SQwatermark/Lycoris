@@ -154,6 +154,11 @@ dependencies {
 
 }
 
+// 打包源码
+java {
+    withSourcesJar()
+}
+
 jar {
     manifest {
         attributes([
