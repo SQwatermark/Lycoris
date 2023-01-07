@@ -14,7 +14,7 @@ public class MixinTextureAtlasSprite implements TextureAtlasSpriteExtension {
 	@Unique
 	private PBRSpriteHolder pbrHolder;
 
-	@Inject(method = "close()V", at = @At("TAIL"), remap = false)
+	@Inject(method = "close()V", at = @At("TAIL"))
 	private void iris$onTailClose(CallbackInfo ci) {
 		if (pbrHolder != null) {
 			pbrHolder.close();

@@ -23,7 +23,7 @@ public class MixinTextureManager {
 		PBRTextureManager.INSTANCE.clear();
 	}
 
-	@Inject(method = "close()V", at = @At("TAIL"), remap = false)
+	@Inject(method = "close()V", at = @At("TAIL"))
 	private void iris$onTailClose(CallbackInfo ci) {
 		PBRTextureManager.INSTANCE.close();
 	}

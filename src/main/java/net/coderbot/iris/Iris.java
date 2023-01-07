@@ -30,8 +30,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -91,6 +89,9 @@ public class Iris {
 	private static ArtifactVersion IRIS_VERSION;
 	private static UpdateChecker updateChecker;
 	private static boolean fallback;
+
+	public Iris() {
+    }
 
 	@SubscribeEvent
 	public static void registerKeyBinding(FMLClientSetupEvent event) {

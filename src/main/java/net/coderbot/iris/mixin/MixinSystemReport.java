@@ -16,9 +16,11 @@ import java.util.function.Supplier;
  * Adds the current shaderpack and number of changed options to crash reports
  */
 @Mixin(SystemReport.class)
-public abstract class MixinSystemReport {
+public class MixinSystemReport {
 	@Shadow
-	public abstract void setDetail(String string, Supplier<String> supplier);
+	public void setDetail(String string, Supplier<String> supplier) {
+
+    }
 
 	@Inject(at = @At("RETURN"), method = "<init>")
     private void fillSystemDetails(CallbackInfo ci) {

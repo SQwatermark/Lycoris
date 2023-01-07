@@ -18,17 +18,16 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
 version = '1.0'
-group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'com.yourname.modid'
 archivesBaseName = 'modid'
 
-// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
     mappings channel: 'official', version: '1.18.2'
 
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         client {
@@ -111,39 +110,50 @@ repositories {
      flatDir {
          dir 'libs'
      }
+    mavenCentral()
+}
+
+// 启用jarJar
+jarJar.enable()
+
+// 混淆jarJar
+reobf.create('jarJar')
+
+// 运行build时进行jarJar
+build {
+    dependsOn 'jarJar'
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
+    implementation fg.deobf("wisteris:wisteria-mc1.18.2:0.4.1-all")
 
-    // Real mod deobf dependency examples - these get remapped to your current mappings
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
-    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
-    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
+    // 仅在开发环境引入
+    compileOnly "org.apache.ant:ant:1.8.2"
+    // 因为sodium已包含joml，所以运行和打包都不需要
+    compileOnly "org.joml:joml:1.10.4"
 
-    // Examples using mod jars from ./libs
-    implementation fg.deobf("sodium:sodium-forge-mc1.18.2:0.4.1+rev.369109f-dirty")
+    // 在开发环境引入jcpp
+    minecraftLibrary("org.anarres:jcpp:1.4.14") {
+        // jcpp会引入冲突的依赖，必须阻止依赖传递
+        transitive(false)
+    }
+    // 打包jcpp
+    jarJar(group: 'org.anarres', name: 'jcpp', version: '[1.0,2.0)') {
+        transitive(false)
+    }
 
-    implementation "org.apache.ant:ant:1.8.2"
-//    implementation "org.anarres:jcpp:1.4.14"
-//    implementation "org.antlr:antlr4-runtime:4.11.1"
-//    implementation "org.joml:joml:1.10.4"
-//    implementation "io.github.douira:glsl-transformer:2.0.0-pre8"
-
-//    jarJar.enable()
-//    jarJar(group: 'org.anarres', name: 'jcpp', version: '[1.0,2.0)')
-//    jarJar(group: 'org.antlr', name: 'antlr4-runtime', version: '[4.0,5.0)')
-//    jarJar(group: 'org.joml', name: 'joml', version: '[1.0,2.0)')
-//    jarJar(group: 'io.github.douira', name: 'glsl-transformer', version: '[2.0,3.0)')
+    // 因为glsl-transformer依赖4.11.1版本的antlr4-runtime但是forge环境依赖更早的版本
+    // 为避免冲突，只能把这两个依赖都打包进模组，并修改antlr4.11.1版本的包名
+    //    minecraftLibrary "org.antlr:antlr4-runtime:4.11.1"
+    //    minecraftLibrary "io.github.douira:glsl-transformer:2.0.0-pre8"
+    //    jarJar(group: 'org.antlr', name: 'antlr4-runtime', version: '[4.0,5.0)')
+    //    jarJar(group: 'io.github.douira', name: 'glsl-transformer', version: '[2.0,3.0)')
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
-// Example for how to get properties into the manifest for reading at runtime.
 jar {
     manifest {
         attributes([
@@ -155,25 +165,6 @@ jar {
                 "Implementation-Vendor"   : "examplemodsareus",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
-    }
-}
-
-// Example configuration to allow publishing using the maven-publish plugin
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-// publish.dependsOn('reobfJar')
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
     }
 }
 

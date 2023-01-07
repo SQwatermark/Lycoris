@@ -1,7 +1,5 @@
 package net.coderbot.iris.mixin.texture;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.coderbot.iris.Iris;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
