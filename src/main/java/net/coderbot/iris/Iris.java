@@ -707,7 +707,7 @@ public class Iris {
 			return "Version info unknown!";
 		}
 
-		return IRIS_VERSION.getQualifier(); // TODO ?
+		return String.format("%s.%s.%s", IRIS_VERSION.getMajorVersion(), IRIS_VERSION.getMinorVersion(), IRIS_VERSION.getIncrementalVersion()); // TODO ?
 	}
 
 	public static String getFormattedVersion() {

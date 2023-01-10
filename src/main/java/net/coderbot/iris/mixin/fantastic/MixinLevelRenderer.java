@@ -52,10 +52,10 @@ public class MixinLevelRenderer {
 		ParticleRenderingSettings settings = getRenderingSettings();
 
 		if (settings == ParticleRenderingSettings.BEFORE) {
-			minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+			minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f, null); // TODO
 		} else if (settings == ParticleRenderingSettings.MIXED) {
 			((PhasedParticleEngine) minecraft.particleEngine).setParticleRenderingPhase(ParticleRenderingPhase.OPAQUE);
-			minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+			minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f, null);
 		}
 	}
 

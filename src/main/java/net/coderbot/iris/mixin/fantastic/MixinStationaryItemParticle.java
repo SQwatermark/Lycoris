@@ -21,11 +21,11 @@ public class MixinStationaryItemParticle {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void iris$resolveTranslucency(ClientLevel clientLevel, double d, double e, double f, BlockState blockState, CallbackInfo ci) {
-			RenderType type = ItemBlockRenderTypes.getChunkRenderType(blockState);
-
-			if (type == RenderType.solid() || type == RenderType.cutout() || type == RenderType.cutoutMipped()) {
+			if (ItemBlockRenderTypes.canRenderInLayer(blockState, RenderType.solid())
+					|| ItemBlockRenderTypes.canRenderInLayer(blockState, RenderType.cutout())
+					|| ItemBlockRenderTypes.canRenderInLayer(blockState, RenderType.cutoutMipped())) {
 				isOpaque = true;
-		}
+			}
 	}
 
 	@Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
