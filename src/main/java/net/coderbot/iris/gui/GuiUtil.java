@@ -2,6 +2,7 @@ package net.coderbot.iris.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.coderbot.iris.Iris;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -24,7 +25,7 @@ import net.minecraft.sounds.SoundEvents;
  * some code that will be changed.
  */
 public final class GuiUtil {
-	public static final ResourceLocation IRIS_WIDGETS_TEX = new ResourceLocation("iris", "textures/gui/widgets.png");
+	public static final ResourceLocation IRIS_WIDGETS_TEX = new ResourceLocation(Iris.MODID, "textures/gui/widgets.png");
 	private static final Component ELLIPSIS = new TextComponent("...");
 
 	private GuiUtil() {}

@@ -24,7 +24,7 @@ public class MixinMinecraft_Images {
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void iris$setupImages(GameConfig arg, CallbackInfo ci) {
 		try {
-			Minecraft.getInstance().getTextureManager().register(new ResourceLocation("iris", "textures/gui/widgets.png"), new NativeImageBackedCustomTexture(new CustomTextureData.PngData(new TextureFilteringData(false, false), IOUtils.toByteArray(Iris.class.getResourceAsStream("/assets/iris/textures/gui/widgets.png")))));
+			Minecraft.getInstance().getTextureManager().register(new ResourceLocation("lycoris", "textures/gui/widgets.png"), new NativeImageBackedCustomTexture(new CustomTextureData.PngData(new TextureFilteringData(false, false), IOUtils.toByteArray(Iris.class.getResourceAsStream("/assets/lycoris/textures/gui/widgets.png")))));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

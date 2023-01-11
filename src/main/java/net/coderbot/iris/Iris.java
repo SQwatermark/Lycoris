@@ -52,14 +52,14 @@ import java.util.zip.ZipException;
 @Mod(Iris.MODID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Iris.MODID, value = Dist.CLIENT)
 public class Iris {
-	public static final String MODID = "iris";
+	public static final String MODID = "lycoris";
 
 	/**
 	 * The user-facing name of the mod. Moved into a constant to facilitate
 	 * easy branding changes (for forks). You'll still need to change this
 	 * separately in mixin plugin classes & the language files.
 	 */
-	public static final String MODNAME = "Iris";
+	public static final String MODNAME = "Lycoris";
 
 	public static final IrisLogging logger = new IrisLogging(MODNAME);
 
@@ -131,7 +131,7 @@ public class Iris {
 //		ModContainer iris = ModList.get().getModContainerById(MODID)
 //				.orElseThrow(() -> new IllegalStateException("Couldn't find the mod container for Iris"));
 
-		IRIS_VERSION = new DefaultArtifactVersion("0.0.1");
+		IRIS_VERSION = new DefaultArtifactVersion("1.5.0-pre1");
 
 		updateChecker = new UpdateChecker(IRIS_VERSION);
 
@@ -144,7 +144,7 @@ public class Iris {
 			logger.warn("", e);
 		}
 
-		irisConfig = new IrisConfig(Paths.get("config").resolve("iris.properties"));
+		irisConfig = new IrisConfig(Paths.get("config").resolve("lycoris.properties"));
 
 		try {
 			irisConfig.initialize();
@@ -707,7 +707,7 @@ public class Iris {
 			return "Version info unknown!";
 		}
 
-		return String.format("%s.%s.%s", IRIS_VERSION.getMajorVersion(), IRIS_VERSION.getMinorVersion(), IRIS_VERSION.getIncrementalVersion()); // TODO ?
+		return IRIS_VERSION.toString();
 	}
 
 	public static String getFormattedVersion() {
