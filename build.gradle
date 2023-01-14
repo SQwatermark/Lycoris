@@ -17,9 +17,9 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
-version = '1.5-pre1'
+version = '1.5.0-pre3'
 group = 'net.coderbot.iris'
-archivesBaseName = 'Lycoris-mc1.18.2'
+archivesBaseName = 'lycoris-mc1.18.2'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -124,7 +124,7 @@ tasks.jarJar.getArchiveClassifier().convention('')
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
-    implementation fg.deobf('me.jellysquid.mods:wisteria-mc1.18.2:0.4.2-pre1')
+    implementation fg.deobf('me.jellysquid.mods:wisteria-mc1.18.2:0.4.2-pre3')
 
     // 仅在开发环境引入
     compileOnly 'org.apache.ant:ant:1.8.2'
