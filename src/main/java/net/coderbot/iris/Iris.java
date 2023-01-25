@@ -3,6 +3,7 @@ package net.coderbot.iris;
 import com.google.common.base.Throwables;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.coderbot.iris.compat.flywheel.FlywheelCompat;
 import net.coderbot.iris.config.IrisConfig;
 import net.coderbot.iris.gl.GLDebug;
 import net.coderbot.iris.gl.shader.StandardMacros;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -50,7 +52,7 @@ import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 
 @Mod(Iris.MODID)
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE, modid = Iris.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, modid = Iris.MODID, value = Dist.CLIENT)
 public class Iris {
 	public static final String MODID = "lycoris";
 
@@ -91,10 +93,14 @@ public class Iris {
 	private static boolean fallback;
 
 	public Iris() {
+
     }
 
 	@SubscribeEvent
-	public static void registerKeyBinding(FMLClientSetupEvent event) {
+	public static void onClientSetup(FMLClientSetupEvent event) {
+		if (ModList.get().isLoaded("flywheel")) {
+			FlywheelCompat.disableBackend();
+		}
 		ClientRegistry.registerKeyBinding(reloadKeybind);
 		ClientRegistry.registerKeyBinding(toggleShadersKeybind);
 		ClientRegistry.registerKeyBinding(shaderpackScreenKeybind);

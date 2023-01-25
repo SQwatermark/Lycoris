@@ -17,8 +17,8 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
-version = '1.5.0-pre3'
-group = 'net.coderbot.iris'
+version = '1.5.0-pre4'
+group = 'moe.sqwatermark'
 archivesBaseName = 'lycoris-mc1.18.2'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -124,7 +124,7 @@ tasks.jarJar.getArchiveClassifier().convention('')
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
-    implementation fg.deobf('me.jellysquid.mods:wisteria-mc1.18.2:0.4.2-pre3')
+    implementation fg.deobf('moe.sqwatermark:wisteria-mc1.18.2:0.4.2-pre4')
 
     // 仅在开发环境引入
     compileOnly 'org.apache.ant:ant:1.8.2'
@@ -147,6 +147,9 @@ dependencies {
     jarJar(group: 'org.apache.commons', name: 'commons-collections4', version: '[4.0,5.0)') {
         transitive(false)
     }
+
+    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge:1.18.2-0.6.8.a")
+    implementation fg.deobf("create:create:1.18.2-0.5.0.h")
 
     // 因为glsl-transformer依赖4.11.1版本的antlr4-runtime但是forge环境依赖更早的版本
     // 为避免冲突，只能把这两个依赖都打包进模组，并修改antlr4.11.1版本的包名
