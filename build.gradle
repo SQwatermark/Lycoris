@@ -112,6 +112,7 @@ repositories {
      }
     mavenCentral()
     maven { url 'https://github.com/SQwatermark/maven-repository/raw/main' }
+    maven { url "https://cursemaven.com" }
 }
 
 // 启用jarJar
@@ -124,7 +125,7 @@ tasks.jarJar.getArchiveClassifier().convention('')
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
-    implementation fg.deobf('moe.sqwatermark:wisteria-mc1.18.2:0.4.2-pre4')
+    implementation fg.deobf('moe.sqwatermark:wisteria-mc1.18.2:0.4.2-pre5')
 
     // 仅在开发环境引入
     compileOnly 'org.apache.ant:ant:1.8.2'
@@ -148,8 +149,8 @@ dependencies {
         transitive(false)
     }
 
-    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge:1.18.2-0.6.8.a")
-    implementation fg.deobf("create:create:1.18.2-0.5.0.h")
+    implementation fg.deobf("curse.maven:flywheel-486392:4341461")
+    implementation fg.deobf("curse.maven:create-328085:4371807")
 
     // 因为glsl-transformer依赖4.11.1版本的antlr4-runtime但是forge环境依赖更早的版本
     // 为避免冲突，只能把这两个依赖都打包进模组，并修改antlr4.11.1版本的包名
