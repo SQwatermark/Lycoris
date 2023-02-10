@@ -1,18 +1,13 @@
 package net.coderbot.iris.pipeline.newshader;
 
-import com.ibm.icu.impl.ICUNotifier;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.IrisRenderSystem;
 import net.coderbot.iris.gl.blending.AlphaTest;
-import net.coderbot.iris.gl.blending.BlendMode;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
 import net.coderbot.iris.gl.blending.BufferBlendOverride;
 import net.coderbot.iris.gl.framebuffer.GlFramebuffer;
@@ -21,38 +16,27 @@ import net.coderbot.iris.gl.program.ProgramImages;
 import net.coderbot.iris.gl.program.ProgramSamplers;
 import net.coderbot.iris.gl.program.ProgramUniforms;
 import net.coderbot.iris.gl.sampler.SamplerHolder;
-import net.coderbot.iris.gl.state.ValueUpdateNotifier;
-import net.coderbot.iris.gl.texture.InternalTextureFormat;
 import net.coderbot.iris.gl.texture.TextureType;
 import net.coderbot.iris.gl.uniform.DynamicLocationalUniformHolder;
-import net.coderbot.iris.gl.uniform.DynamicUniformHolder;
 import net.coderbot.iris.samplers.IrisSamplers;
 import net.coderbot.iris.uniforms.CapturedRenderingState;
 import net.coderbot.iris.uniforms.custom.CustomUniforms;
-import net.coderbot.iris.vendored.joml.FrustumRayBuilder;
 import net.coderbot.iris.vendored.joml.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.ARBTextureSwizzle;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
-import org.lwjgl.opengl.GL32C;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 public class ExtendedShader extends ShaderInstance implements ShaderInstanceInterface {
 	private final boolean intensitySwizzle;
@@ -133,6 +117,12 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 
 	Matrix4f tempMatrix4f = new Matrix4f();
 	Matrix3f tempMatrix3f = new Matrix3f();
+	private static final com.mojang.math.Matrix4f identity;
+
+	static {
+		identity = new com.mojang.math.Matrix4f();
+		identity.setIdentity();
+	}
 	float[] tempFloats = new float[16];
 	float[] tempFloats2 = new float[9];
 
@@ -155,15 +145,33 @@ public class ExtendedShader extends ShaderInstance implements ShaderInstanceInte
 		IrisRenderSystem.bindTextureToUnit(TextureType.TEXTURE_2D.getGlType(), IrisSamplers.LIGHTMAP_TEXTURE_UNIT, RenderSystem.getShaderTexture(2));
 
 		if (projectionInverse != null) {
-			projectionInverse.set(tempMatrix4f.set(PROJECTION_MATRIX.getFloatBuffer()).invert().get(tempFloats));
+			if (PROJECTION_MATRIX != null) {
+				if (projectionInverse != null) {
+					projectionInverse.set(tempMatrix4f.set(PROJECTION_MATRIX.getFloatBuffer()).invert().get(tempFloats));
+				}
+			} else {
+				if (projectionInverse != null) {
+					projectionInverse.set(identity);
+				}
+			}
 		}
 
-		if (modelViewInverse != null) {
-			modelViewInverse.set(tempMatrix4f.set(MODEL_VIEW_MATRIX.getFloatBuffer()).invert().get(tempFloats));
-		}
+		if (MODEL_VIEW_MATRIX != null) {
+			if (modelViewInverse != null) {
+				modelViewInverse.set(tempMatrix4f.set(MODEL_VIEW_MATRIX.getFloatBuffer()).invert().get(tempFloats));
+			}
 
-		if (normalMatrix != null) {
-			normalMatrix.set(tempMatrix3f.set(tempMatrix4f.set(MODEL_VIEW_MATRIX.getFloatBuffer())).invert().transpose().get(tempFloats2));
+			if (normalMatrix != null) {
+				normalMatrix.set(tempMatrix3f.set(tempMatrix4f.set(MODEL_VIEW_MATRIX.getFloatBuffer())).invert().transpose().get(tempFloats2));
+			}
+		} else {
+			if (modelViewInverse != null) {
+				modelViewInverse.set(identity);
+			}
+
+			if (normalMatrix != null) {
+				normalMatrix.set(identity);
+			}
 		}
 
 		uploadIfNotNull(projectionInverse);
